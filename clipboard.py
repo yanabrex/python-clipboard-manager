@@ -16,13 +16,21 @@ try:
 except FileNotFoundError:
     history = []
 
-print("Clipboard manager is running! Press Ctrl+C to stop.")
+print("Clipboard manager is running! Press Ctrl+C to stop.\n")
+print("Copy 'CLEAR' if you want to erase all saved items from the file.")
 
 try:
     while True:
-        current = pyperclip.paste()
+        current = pyperclip.paste().strip()
+        # detect if the special word was copied that indicates clearing the file history
+        if current.upper() == "CLEAR" and current != last_clip:
+            history = []
+            with open("clipboard.json", "w") as f:
+                json.dump(history, f, indent=2)
+                print("Clipboard history has been cleared.")
+                last_clip = current
         # check if anything was copied and it is a new item that was copied
-        if current != last_clip and current.strip() != "":
+        elif current != last_clip and current != "":
             history.append(current)
             history = history[-50:]
             print(f"Items copied: [{len(history)}] The current item: {current}")
