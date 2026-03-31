@@ -1,0 +1,36 @@
+import pyperclip
+import time
+import json
+import os
+
+last_clip = ""
+history = []
+# check if the json file exists or is empty, otherwise create it or formate it properly with []
+if not os.path.exists("clipboard.json") or os.path.getsize("clipboard.json") == 0:
+    with open("clipboard.json", "w") as f:
+        json.dump([], f)
+
+try:
+    with open("clipboard.json", "r") as f:
+        history = json.load(f)
+except FileNotFoundError:
+    history = []
+
+print("Clipboard manager is running! Press Ctrl+C to stop.")
+
+try:
+    while True:
+        current = pyperclip.paste()
+        # check if anything was copied and it is a new item that was copied
+        if current != last_clip and current.strip() != "":
+            history.append(current)
+            history = history[-50:]
+            print(f"Items copied: [{len(history)}] The current item: {current}")
+            last_clip = current
+        # scan clipboard every second
+        time.sleep(1)
+
+except KeyboardInterrupt:
+    with open("clipboard.json", "w") as f:
+        json.dump(history, f, indent=2)
+    print("\nThe program has been stopped.")
